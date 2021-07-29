@@ -75,7 +75,7 @@ const NavigationBar = (props) => {
 				<Form inline>
 					<FormControl
 						type="text"
-						placeholder="Search your Notez"
+						placeholder="Search by category"
 						className="mr-sm-2"
 					/>
 					<Button variant="outline-info">Search</Button>
