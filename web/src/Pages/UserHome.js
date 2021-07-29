@@ -11,10 +11,11 @@ import {
 	Row,
 	Col,
 	Toast,
-	CloseButton,
+	Popover,
+	OverlayTrigger,
 } from "react-bootstrap";
 //import UserContext from "../Components/Context/UserContext";
-import "../bootstrap/customDash.css";
+import "../bootstrap/userHome.css";
 //import ToastAlert from "../Components/Toast";
 import useNoteUpdate from "../Components/CustomHooks/useNoteUpdate";
 
@@ -37,7 +38,8 @@ const UserHome = () => {
 	const [editNote, setEditNote] = useState(false);
 	const [noteEditState, setNoteEditState] = useState(0);
 	const [noteEditID, setNoteEditID] = useState(null);
-	const [toastShow, toastSetShow] = useState(false);
+	const [toastShow, setToastShow] = useState(false);
+	const [warningShow, setWarningShow] = useState(false);
 
 	const getNotes = async (callback) => {
 		const response = await fetch("http://localhost:8080/getNotes", {
@@ -64,7 +66,7 @@ const UserHome = () => {
 	const ToastBody = () => {
 		return (
 			<Toast
-				onClose={() => toastSetShow(!toastShow)}
+				onClose={() => setToastShow(!toastShow)}
 				show={toastShow}
 				id="toast-alert"
 				autohide
@@ -123,7 +125,7 @@ const UserHome = () => {
 			notesShallowCopyReverse[0].category === "category" //this needs actual error handling
 		) {
 			// if blank note has been added and not updated show toast
-			toastSetShow(!toastShow);
+			setToastShow(!toastShow);
 			console.log("toast");
 			return;
 		} else {
@@ -151,24 +153,6 @@ const UserHome = () => {
 	const cardsForms = notesShallowCopyReverse.map((note) => (
 		<div key={note.nid}>
 			<Card style={{ width: "18rem" }}>
-				<Container>
-					<Row md={6}>
-						<Col>
-							<div>
-								{note.user_edit ? (
-									<CloseButton
-										id="close-button"
-										variant="white"
-										onClick={() => {
-											console.log("delete note");
-										}}
-									></CloseButton>
-								) : null}
-							</div>
-						</Col>
-					</Row>
-				</Container>
-
 				<Form>
 					<Card.Header id="card-header">
 						<Form.Group>
@@ -218,7 +202,7 @@ const UserHome = () => {
 								// if edit is selected change to edit note state
 								if (noteEditState === true && noteEditID !== note.nid) {
 									//if a note is already open for editng -> set toast
-									toastSetShow(!toastShow);
+									setToastShow(!toastShow);
 									console.log(noteEditID);
 								} else if (noteEditState === true && noteEditID === note.nid) {
 									//if save is clicked and a change has occured -> update db
@@ -235,6 +219,16 @@ const UserHome = () => {
 							}}
 						>
 							{note.user_edit ? "Save" : "Edit"}
+						</Button>
+						<Button
+							id="delete-button"
+							variant="link"
+							size="sm"
+							onClick={() => {
+								console.log("delete note");
+							}}
+						>
+							{note.user_edit ? "Delete" : null}
 						</Button>
 					</Card.Body>
 				</Form>
