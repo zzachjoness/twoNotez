@@ -158,6 +158,11 @@
 	z-index: 10000;
 	animation: toast-alert 0.8s ease 0s 1 normal forwards;
 }
+#toast-delete {
+	position: fixed;
+	z-index: 10000;
+	animation: toast-alert 0.8s ease 0s 1 normal forwards;
+}
 
 @keyframes toast-alert {
 	0% {

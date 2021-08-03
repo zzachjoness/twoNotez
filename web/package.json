@@ -1,5 +1,6 @@
 {
 	"name": "web",
+	"license": "MIT",
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
@@ -17,6 +18,7 @@
 	},
 	"scripts": {
 		"start": "PORT=80 react-scripts start",
+		"lint": "eslint src",
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject"
@@ -24,8 +26,13 @@
 	"eslintConfig": {
 		"extends": [
 			"react-app",
-			"react-app/jest"
-		]
+			"react-app/jest",
+			"eslint:recommended",
+			"plugin:react/recommended"
+		],
+		"rules": {
+			"no-unused-vars": "warn"
+		}
 	},
 	"browserslist": {
 		"production": [
@@ -38,5 +45,8 @@
 			"last 1 firefox version",
 			"last 1 safari version"
 		]
+	},
+	"devDependencies": {
+		"prettier": "2.3.2"
 	}
 }

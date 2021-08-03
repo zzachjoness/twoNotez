@@ -10,10 +10,12 @@ CREATE TABLE users (
 
 CREATE TABLE notes(
   nid SERIAL NOT NULL,
-  title VARCHAR(255),
-  body VARCHAR NOT NULL,
+  category VARCHAR(255) default 'category',
+  title VARCHAR(255) default 'title',
+  body VARCHAR default 'body',
   uid INT NOT NULL,
-  date_created TIMESTAMP,
-  PRIMARY KEY (nid, uid),
-  FOREIGN KEY (uid) REFERENCES users (uid)
+  last_updated TIMESTAMP,
+  user_edit BOOLEAN not null default false,
+PRIMARY KEY (nid, uid),
+FOREIGN KEY (uid) REFERENCES users (uid)
 );

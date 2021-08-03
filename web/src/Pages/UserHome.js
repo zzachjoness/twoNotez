@@ -6,17 +6,12 @@ import {
 	Card,
 	CardColumns,
 	Nav,
-	//NavDropdown,
 	Container,
 	Row,
 	Col,
 	Toast,
-	Popover,
-	OverlayTrigger,
 } from "react-bootstrap";
-//import UserContext from "../Components/Context/UserContext";
 import "../bootstrap/userHome.css";
-//import ToastAlert from "../Components/Toast";
 import useNoteUpdate from "../Components/CustomHooks/useNoteUpdate";
 
 const UserHome = () => {
@@ -40,6 +35,7 @@ const UserHome = () => {
 	const [noteEditID, setNoteEditID] = useState(null);
 	const [toastShow, setToastShow] = useState(false);
 	const [warningShow, setWarningShow] = useState(false);
+	const [noteDeleteID, setNoteDeleteID] = useState(null);
 
 	const getNotes = async (callback) => {
 		const response = await fetch("http://localhost:8080/getNotes", {
@@ -52,34 +48,26 @@ const UserHome = () => {
 		}
 	};
 
+	const deleteNote = async () => {
+		const response = await fetch("http://localhost:8080/deleteNote", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json",
+			},
+			credentials: "include",
+			withCredentials: true,
+			body: JSON.stringify({ nid: noteDeleteID }),
+		});
+		const data = await response.json();
+		console.log(data);
+		/*if (data.notes) {
+			setNotes(data.notes);
+			setNoteDeleteID(null);
+		}*/
+	};
+
 	const findNote = (card) => {
 		return notes.find(({ nid }) => nid === card);
-	};
-	/*
-	NOT IN USE CURRENTLY 
-	function noteChange(card, category, title, body) {
-		let userUpdate = { nid: card, category: category, title: title, body: body };
-		const niq = findNote(card);
-	}
-	*/
-
-	const ToastBody = () => {
-		return (
-			<Toast
-				onClose={() => setToastShow(!toastShow)}
-				show={toastShow}
-				id="toast-alert"
-				autohide
-			>
-				<Toast.Header>
-					<strong className="mr-auto">twoNOTEZ</strong>
-				</Toast.Header>
-				<Toast.Body>
-					Update & save, or remove your blank note before creating or editing
-					another.
-				</Toast.Body>
-			</Toast>
-		);
 	};
 
 	const updateNote = async () => {
@@ -104,20 +92,6 @@ const UserHome = () => {
 		niq.user_edit = !niq.user_edit; // I want to get away from editing state that is not directly incoming from the db
 		setEditNote(!editNote);
 	};
-
-	const updateCalc = (mins) => {
-		if (mins < 60) {
-			return mins + " minutes ago";
-		} else if (mins < 60 * 24) {
-			return Math.floor(mins / 60) + " hours ago";
-		} else {
-			return Math.floor(mins / (60 * 24)) + " days ago";
-		}
-	};
-
-	useEffect(() => {
-		getNotes(setNotes);
-	}, []);
 
 	const createNote = async () => {
 		if (
@@ -149,6 +123,71 @@ const UserHome = () => {
 		? "note-category-input-unlocked"
 		: "note-category-input";
 	let notesShallowCopyReverse = [...notes].reverse();
+
+	const ToastBody = () => {
+		return (
+			<Toast
+				onClose={() => setToastShow(!toastShow)}
+				show={toastShow}
+				id="toast-alert"
+				autohide
+			>
+				<Toast.Header>
+					<strong className="mr-auto">twoNOTEZ</strong>
+				</Toast.Header>
+				<Toast.Body>
+					Update & save, or remove your blank note before creating or editing
+					another.
+				</Toast.Body>
+			</Toast>
+		);
+	};
+	const DeleteToast = () => {
+		return (
+			<Toast
+				onClose={() => setWarningShow(!warningShow)}
+				show={warningShow}
+				id="toast-delete"
+				onClick={() => {
+					setWarningShow(!warningShow);
+				}}
+			>
+				<Toast.Header>
+					<strong className="mr-auto">twoNOTEZ</strong>
+				</Toast.Header>
+				<Toast.Body>Are you sure you want to delete this note?</Toast.Body>
+				<Button variant="link" className="note-button" size="sm">
+					Cancel
+				</Button>
+				<Button
+					id="delete-button"
+					variant="link"
+					size="sm"
+					onClick={() => {
+						setWarningShow(!warningShow);
+						deleteNote();
+					}}
+				>
+					Delete
+				</Button>
+			</Toast>
+		);
+	};
+
+	const updateCalc = (mins) => {
+		if (mins < 60) {
+			return mins + " minutes ago";
+		} else if (mins < 60 * 24) {
+			return Math.floor(mins / 60) + " hours ago";
+		} else {
+			return Math.floor(mins / (60 * 24)) + " days ago";
+		}
+	};
+
+	useEffect(() => {
+		getNotes(setNotes);
+		console.log("useEffect");
+	}, []);
 
 	const cardsForms = notesShallowCopyReverse.map((note) => (
 		<div key={note.nid}>
@@ -225,7 +264,9 @@ const UserHome = () => {
 							variant="link"
 							size="sm"
 							onClick={() => {
-								console.log("delete note");
+								setWarningShow(!warningShow);
+								DeleteToast();
+								setNoteDeleteID(note.nid);
 							}}
 						>
 							{note.user_edit ? "Delete" : null}
@@ -269,10 +310,11 @@ const UserHome = () => {
 					<Row>
 						<React.StrictMode>
 							<Col xs={6} className="mb-2">
-								{toastShow ? <ToastBody /> : null}
+								{toastShow ? <ToastBody /> : warningShow ? <DeleteToast /> : null}
 							</Col>
 						</React.StrictMode>
 					</Row>
+
 					<CardColumns id="">
 						{notes.length === 0 ? <div></div> : cardsForms}
 					</CardColumns>

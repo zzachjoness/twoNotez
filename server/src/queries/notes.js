@@ -8,21 +8,21 @@ const pool = new Pool({
 	port: process.env.DB_PORT,
 });
 
-const getNotes = (req, res) => {
+const getNotes = async (req, res) => {
 	if (!req.session.userID) {
 		return res.send({
 			errors: [{ field: "me", message: "user not logged in" }],
 		});
 	}
-	// alter try/catch
-	pool.query(
-		"SELECT * FROM notes WHERE uid = $1",
-		[req.session.userID],
-		(error, result) => {
-			const notes = result.rows;
-			res.status(200).send({ notes });
-		}
-	);
+	try {
+		const result = await pool.query("SELECT * FROM notes WHERE uid = $1", [
+			req.session.userID,
+		]);
+		const notes = result.rows;
+		return res.status(200).send({ notes });
+	} catch (err) {
+		return res.send({ error: err });
+	}
 };
 
 const createNote = async (req, res) => {
@@ -34,8 +34,20 @@ const createNote = async (req, res) => {
 	res.status(200).send({ note });
 };
 
-//add deleteNote in React
-const deleteNote = async (req, res) => {};
+const deleteNote = async (req, res) => {
+	const nid = req.body.nid;
+	try {
+		const result = await pool.query(
+			`DELETE FROM notes WHERE nid = ${nid} RETURNING *`
+		);
+		const notes = result.rows;
+		console.log("returning notes: ", notes);
+		return res.send({ notes });
+	} catch (err) {
+		console.log(err);
+		return res.send({ error: err });
+	}
+};
 
 const updateNote = async (req, res) => {
 	const { category, title, body, nid } = req.body;
@@ -56,8 +68,7 @@ const updateNote = async (req, res) => {
 		const note = result.rows;
 		return res.status(200).send({ note });
 	} catch (err) {
-		//adjust error statement in res.send
-		return res.send("error");
+		return res.send({ error: err });
 	}
 };
 

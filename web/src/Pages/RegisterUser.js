@@ -3,6 +3,8 @@ import { Form, Button, Row, Col } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import useRegister from "../Components/CustomHooks/useRegister";
 import UserContext from "../Components/Context/UserContext";
+import Home from "../Pages/Home";
+const hi = "hi";
 
 const RegisterUser = () => {
 	const history = useHistory();
@@ -26,7 +28,6 @@ const RegisterUser = () => {
 			setErrors(data.errors[0]);
 		}
 	};
-
 	const { inputs, handleInputChange, handleSubmit } = useRegister(register);
 
 	return (

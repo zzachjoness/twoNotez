@@ -38,7 +38,6 @@ app.use(
 		credentials: true,
 	})
 );
-
 app.use(
 	session({
 		name: COOKIE_NAME,
