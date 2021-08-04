@@ -2,7 +2,6 @@ const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config();
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const session = require("express-session");
 const connectRedis = require("connect-redis");
 const Redis = require("ioredis");
@@ -13,17 +12,13 @@ const notes = require("./queries/notes");
 
 const app = express();
 const port = process.env.PORT;
-//bodyParser depreciated, need to find change
-const jsonParser = bodyParser.json();
-// if you run behind a proxy
-//app.set("trust proxy", 1);
 
 const RedisStore = connectRedis(session);
 const redis = new Redis();
 
-app.use(jsonParser);
+app.use(express.json());
 app.use(
-	bodyParser.urlencoded({
+	express.urlencoded({
 		extended: true,
 	})
 );
