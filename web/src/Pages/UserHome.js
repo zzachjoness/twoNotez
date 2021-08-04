@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 import {
 	Form,
 	Button,
@@ -16,22 +15,9 @@ import useNoteUpdate from "../Components/CustomHooks/useNoteUpdate";
 import getNotes from "../Components/Queries/getNotes";
 import deleteNote from "../Components/Queries/deleteNote";
 import updateCalc from "../Components/utils/updateCalc";
+import createNote from "../Components/Queries/createNote";
 
 const UserHome = () => {
-	/*
-	NOT IN USE CURRENTLY
-	const noteDataStructure = [
-		{
-			body: "",
-			category: "",
-			last_updated: Date.now(),
-			nid: "",
-			title: "",
-			uid: "",
-			user_edit: true,
-		},
-	];
-	*/
 	const [notes, setNotes] = useState([]);
 	const [editNote, setEditNote] = useState(false);
 	const [noteEditState, setNoteEditState] = useState(0);
@@ -66,87 +52,26 @@ const UserHome = () => {
 		niq.user_edit = !niq.user_edit; // I want to get away from editing state that is not directly incoming from the db
 		setEditNote(!editNote);
 	};
-
+	/*	
 	const createNote = async () => {
-		if (
-			notesShallowCopyReverse.length !== 0 &&
-			notesShallowCopyReverse[0].category === "category" //this needs actual error handling
-		) {
-			// if blank note has been added and not updated show toast
-			setToastShow(!toastShow);
-			console.log("toast");
-			return;
-		} else {
-			// create new note in db
-			const response = await fetch("http://localhost:8080/createNote", {
-				method: "POST",
-				headers: {
-					"Content-type": "application/json",
-				},
-				credentials: "include",
-				withCredentials: true,
-			});
-			const data = await response.json();
-			console.log(data);
-			//need to figure out how to handle data
-			getNotes(setNotes);
-		}
+		const response = await fetch("http://localhost:8080/createNote", {
+			method: "POST",
+			headers: {
+				"Content-type": "application/json",
+			},
+			credentials: "include",
+			withCredentials: true,
+		});
+		const data = await response.json();
+		console.log(data);
+		//need to figure out how to handle data
+		getNotes(setNotes);
 	};
-
+*/
 	let unlockInput = noteEditID
 		? "note-category-input-unlocked"
 		: "note-category-input";
 	let notesShallowCopyReverse = [...notes].reverse();
-
-	const ToastBody = () => {
-		return (
-			<Toast
-				onClose={() => setToastShow(!toastShow)}
-				show={toastShow}
-				id="toast-alert"
-				autohide
-			>
-				<Toast.Header>
-					<strong className="mr-auto">twoNOTEZ</strong>
-				</Toast.Header>
-				<Toast.Body>
-					Update & save, or remove your blank note before creating or editing
-					another.
-				</Toast.Body>
-			</Toast>
-		);
-	};
-	const DeleteToast = () => {
-		return (
-			<Toast
-				onClose={() => setWarningShow(!warningShow)}
-				show={warningShow}
-				id="toast-delete"
-				onClick={() => {
-					setWarningShow(!warningShow);
-				}}
-			>
-				<Toast.Header>
-					<strong className="mr-auto">twoNOTEZ</strong>
-				</Toast.Header>
-				<Toast.Body>Are you sure you want to delete this note?</Toast.Body>
-				<Button variant="link" className="note-button" size="sm">
-					Cancel
-				</Button>
-				<Button
-					id="delete-button"
-					variant="link"
-					size="sm"
-					onClick={() => {
-						setWarningShow(!warningShow);
-						deleteNote(noteDeleteID);
-					}}
-				>
-					Delete
-				</Button>
-			</Toast>
-		);
-	};
 
 	useEffect(() => {
 		getNotes(setNotes);
@@ -249,6 +174,56 @@ const UserHome = () => {
 		</div>
 	));
 
+	const ToastBody = () => {
+		return (
+			<Toast
+				onClose={() => setToastShow(!toastShow)}
+				show={toastShow}
+				id="toast-alert"
+				autohide
+			>
+				<Toast.Header>
+					<strong className="mr-auto">twoNOTEZ</strong>
+				</Toast.Header>
+				<Toast.Body>
+					Update & save, or remove your blank note before creating or editing
+					another.
+				</Toast.Body>
+			</Toast>
+		);
+	};
+	const DeleteToast = () => {
+		return (
+			<Toast
+				onClose={() => setWarningShow(!warningShow)}
+				show={warningShow}
+				id="toast-delete"
+				onClick={() => {
+					setWarningShow(!warningShow);
+				}}
+			>
+				<Toast.Header>
+					<strong className="mr-auto">twoNOTEZ</strong>
+				</Toast.Header>
+				<Toast.Body>Are you sure you want to delete this note?</Toast.Body>
+				<Button variant="link" className="note-button" size="sm">
+					Cancel
+				</Button>
+				<Button
+					id="delete-button"
+					variant="link"
+					size="sm"
+					onClick={() => {
+						setWarningShow(!warningShow);
+						deleteNote(noteDeleteID);
+					}}
+				>
+					Delete
+				</Button>
+			</Toast>
+		);
+	};
+
 	return (
 		<Container fluid>
 			<Row>
@@ -259,7 +234,17 @@ const UserHome = () => {
 								variant="link"
 								className="nav-button"
 								onClick={() => {
-									createNote();
+									if (
+										notesShallowCopyReverse.length !== 0 &&
+										notesShallowCopyReverse[0].category === "category" //this needs actual error handling
+									) {
+										// if blank note has been added and not updated show toast
+										setToastShow(!toastShow);
+										console.log("toast");
+										return;
+									} else {
+										createNote(setNotes);
+									}
 								}}
 							>
 								Create Note
@@ -278,7 +263,6 @@ const UserHome = () => {
 							</Col>
 						</React.StrictMode>
 					</Row>
-
 					<CardColumns id="">
 						{notes.length === 0 ? <div></div> : cardsForms}
 					</CardColumns>
