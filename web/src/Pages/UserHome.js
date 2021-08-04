@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import "../bootstrap/userHome.css";
 import useNoteUpdate from "../Components/CustomHooks/useNoteUpdate";
+import getNotes from "../Components/Queries/getNotes";
 
 const UserHome = () => {
 	/*
@@ -37,6 +38,7 @@ const UserHome = () => {
 	const [warningShow, setWarningShow] = useState(false);
 	const [noteDeleteID, setNoteDeleteID] = useState(null);
 
+	/*
 	const getNotes = async (callback) => {
 		const response = await fetch("http://localhost:8080/getNotes", {
 			method: "GET",
@@ -47,7 +49,7 @@ const UserHome = () => {
 			callback(data.notes);
 		}
 	};
-
+	*/
 	const deleteNote = async () => {
 		const response = await fetch("http://localhost:8080/deleteNote", {
 			method: "POST",
