@@ -15,6 +15,7 @@ import "../bootstrap/userHome.css";
 import useNoteUpdate from "../Components/CustomHooks/useNoteUpdate";
 import getNotes from "../Components/Queries/getNotes";
 import deleteNote from "../Components/Queries/deleteNote";
+import updateCalc from "../Components/utils/updateCalc";
 
 const UserHome = () => {
 	/*
@@ -145,16 +146,6 @@ const UserHome = () => {
 				</Button>
 			</Toast>
 		);
-	};
-
-	const updateCalc = (mins) => {
-		if (mins < 60) {
-			return mins + " minutes ago";
-		} else if (mins < 60 * 24) {
-			return Math.floor(mins / 60) + " hours ago";
-		} else {
-			return Math.floor(mins / (60 * 24)) + " days ago";
-		}
 	};
 
 	useEffect(() => {
