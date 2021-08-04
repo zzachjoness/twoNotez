@@ -4,9 +4,11 @@ const getNotes = async (callback) => {
 		credentials: "include",
 	});
 	const data = await response.json();
-	if (data.notes.length < 0) {
+	console.log(data);
+	if (data.notes) {
 		callback(data.notes);
 	} else {
+		// needs edit
 		console.log("no data");
 	}
 };

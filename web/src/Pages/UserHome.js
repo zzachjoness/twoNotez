@@ -14,6 +14,7 @@ import {
 import "../bootstrap/userHome.css";
 import useNoteUpdate from "../Components/CustomHooks/useNoteUpdate";
 import getNotes from "../Components/Queries/getNotes";
+import deleteNote from "../Components/Queries/deleteNote";
 
 const UserHome = () => {
 	/*
@@ -37,36 +38,6 @@ const UserHome = () => {
 	const [toastShow, setToastShow] = useState(false);
 	const [warningShow, setWarningShow] = useState(false);
 	const [noteDeleteID, setNoteDeleteID] = useState(null);
-
-	/*
-	const getNotes = async (callback) => {
-		const response = await fetch("http://localhost:8080/getNotes", {
-			method: "GET",
-			credentials: "include",
-		});
-		const data = await response.json();
-		if (data.notes) {
-			callback(data.notes);
-		}
-	};
-	*/
-	const deleteNote = async () => {
-		const response = await fetch("http://localhost:8080/deleteNote", {
-			method: "POST",
-			headers: {
-				"Content-type": "application/json",
-			},
-			credentials: "include",
-			withCredentials: true,
-			body: JSON.stringify({ nid: noteDeleteID }),
-		});
-		const data = await response.json();
-		console.log(data);
-		/*if (data.notes) {
-			setNotes(data.notes);
-			setNoteDeleteID(null);
-		}*/
-	};
 
 	const findNote = (card) => {
 		return notes.find(({ nid }) => nid === card);
@@ -167,7 +138,7 @@ const UserHome = () => {
 					size="sm"
 					onClick={() => {
 						setWarningShow(!warningShow);
-						deleteNote();
+						deleteNote(noteDeleteID);
 					}}
 				>
 					Delete
