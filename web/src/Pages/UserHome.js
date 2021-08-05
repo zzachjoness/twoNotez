@@ -29,8 +29,16 @@ const UserHome = () => {
 	const findNote = (card) => {
 		return notes.find(({ nid }) => nid === card);
 	};
-
-	const updateNote = async () => {
+	const updateNoteHelper = () => {
+		const card = findNote(inputs.nid);
+		for (const key in inputs) {
+			if (inputs[key] === "") {
+				inputs[key] = card[key];
+			}
+		}
+		updateNote(inputs);
+	};
+	const updateNote = async (body) => {
 		const response = await fetch("http://localhost:8080/updateNote", {
 			method: "POST",
 			headers: {
@@ -38,46 +46,30 @@ const UserHome = () => {
 			},
 			credentials: "include",
 			withCredentials: true,
-			body: JSON.stringify(inputs),
+			body: JSON.stringify(body),
 		});
 		const data = await response.json();
 		console.log(data);
 		// do I need to update DOM after updateNOTE?
 		// do I need to call setNOTES with data?
 	};
-	const { inputs, handleInputChange, handleSubmit } = useNoteUpdate(updateNote);
+	const { inputs, handleInputChange, handleSubmit } =
+		useNoteUpdate(updateNoteHelper);
 
 	const userEdit = (card) => {
 		const niq = findNote(card);
 		niq.user_edit = !niq.user_edit; // I want to get away from editing state that is not directly incoming from the db
 		setEditNote(!editNote);
 	};
-	/*	
-	const createNote = async () => {
-		const response = await fetch("http://localhost:8080/createNote", {
-			method: "POST",
-			headers: {
-				"Content-type": "application/json",
-			},
-			credentials: "include",
-			withCredentials: true,
-		});
-		const data = await response.json();
-		console.log(data);
-		//need to figure out how to handle data
-		getNotes(setNotes);
-	};
-*/
+
 	let unlockInput = noteEditID
 		? "note-category-input-unlocked"
 		: "note-category-input";
 	let notesShallowCopyReverse = [...notes].reverse();
-
 	useEffect(() => {
 		getNotes(setNotes);
 		console.log("useEffect");
 	}, []);
-
 	const cardsForms = notesShallowCopyReverse.map((note) => (
 		<div key={note.nid}>
 			<Card style={{ width: "18rem" }}>

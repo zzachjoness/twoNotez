@@ -7,6 +7,7 @@ const getNotes = async (callback) => {
 	console.log(data);
 	if (data.notes) {
 		callback(data.notes);
+		console.log(data.notes);
 	} else {
 		// needs edit
 		console.log("no data");

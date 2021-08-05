@@ -61,9 +61,10 @@ const updateNote = async (req, res) => {
 	}
 	try {
 		const result = await pool.query(
-			`UPDATE notes SET (${noteStatement}last_updated) 
-			= (${valueStatement}(to_timestamp(${Date.now()} / 1000.0))) 
-			WHERE nid = ${nid} RETURNING *`
+			`UPDATE notes SET (category, title, body, last_updated) 
+			= ($1, $2, $3, (to_timestamp(${Date.now()} / 1000.0))) 
+			WHERE nid = $4 RETURNING *`,
+			[category, title, body, nid]
 		);
 		const note = result.rows;
 		return res.status(200).send({ note });
