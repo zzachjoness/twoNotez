@@ -38,7 +38,8 @@ const deleteNote = async (req, res) => {
 	const nid = req.body.nid;
 	try {
 		const result = await pool.query(
-			`DELETE FROM notes WHERE nid = ${nid} RETURNING *`
+			`DELETE FROM notes WHERE nid = $1 RETURNING *`,
+			[nid]
 		);
 		const notes = result.rows;
 		console.log("returning notes: ", notes);
@@ -51,14 +52,6 @@ const deleteNote = async (req, res) => {
 
 const updateNote = async (req, res) => {
 	const { category, title, body, nid } = req.body;
-	let noteStatement = "";
-	let valueStatement = "";
-	for (const key in req.body) {
-		if (req.body[key] !== "" && key !== "nid") {
-			noteStatement = noteStatement + key + ", ";
-			valueStatement = valueStatement + `'${req.body[key]}', `;
-		}
-	}
 	try {
 		const result = await pool.query(
 			`UPDATE notes SET (category, title, body, last_updated) 
