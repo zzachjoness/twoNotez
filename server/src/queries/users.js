@@ -2,6 +2,7 @@ const { validateRegister } = require("../utils/validateRegister");
 const argon2 = require("argon2");
 const { Pool } = require("pg");
 const { verifyPassword } = require("../utils/verifyPassword.js");
+//hi;
 
 const pool = new Pool({
 	user: process.env.DB_USER,
