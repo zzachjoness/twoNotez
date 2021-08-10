@@ -1,6 +1,7 @@
 const { validateRegister } = require("../utils/validateRegister");
 const argon2 = require("argon2");
 const { Pool } = require("pg");
+const { verifyPassword } = require("../utils/verifyPassword.js");
 
 const pool = new Pool({
 	user: process.env.DB_USER,
@@ -17,13 +18,13 @@ const register = async (req, res) => {
 		return res.send({ errors });
 	}
 	const hashedPassword = await argon2.hash(password);
-	let user;
+	const text = `INSERT INTO users (username, password, email, date_created) VALUES ($1, $2, $3, (to_timestamp(${Date.now()} / 1000.0))) RETURNING *`;
+	const values = [username, hashedPassword, email];
 	try {
-		const result = await pool.query(
-			`INSERT INTO users (username, password, email, date_created) VALUES ($1, $2, $3, (to_timestamp(${Date.now()} / 1000.0))) RETURNING *`,
-			[username, hashedPassword, email]
-		);
-		user = result.rows[0];
+		const result = await pool.query(text, values);
+		const user = result.rows[0];
+		req.session.userID = user.uid;
+		return res.status(200).send({ user });
 	} catch (err) {
 		if (err.code === "23505") {
 			return res.send({
@@ -34,40 +35,36 @@ const register = async (req, res) => {
 					},
 				],
 			});
-		}
+		} else return res.status(400).send({ error: err });
 	}
-	//this should be included in the try section with return statement
-	req.session.userID = user.uid;
-	res.status(200).send({ user });
 };
 
-const me = (req, res) => {
-	if (!req.session.userID) {
-		return res.send({ errors: [{ field: "me", message: "user not logged in" }] });
+const me = async (req, res) => {
+	const userID = req.session.userID;
+	if (!userID) {
+		return res
+			.status(404)
+			.send({ errors: [{ field: "me", message: "user not logged in" }] });
 	}
-	pool.query(
-		"SELECT email, username, uid FROM users WHERE uid = $1",
-		[req.session.userID],
-		//[username], to add back in for prod
-		//alter try/catch
-		async (error, results) => {
-			const user = results.rows[0];
-			res.status(200).send({ user });
-		}
-	);
+	const text = "SELECT email, username, uid FROM users WHERE uid = $1";
+	const values = [userID];
+	try {
+		const result = await pool.query(text, values);
+		const user = result.rows[0];
+		return res.status(200).send({ user });
+	} catch (err) {
+		return res.status(400).send({ error: err });
+	}
 };
 const login = async (req, res) => {
-	let loginMethod = "";
 	const { emailOrUsername } = req.body;
 	const passwordInput = req.body.password;
-	emailOrUsername.includes("@")
-		? (loginMethod = "email")
-		: (loginMethod = "username");
+	const text = emailOrUsername.includes("@")
+		? "SELECT email, username, uid, password FROM users WHERE email = $1"
+		: "SELECT email, username, uid, password FROM users WHERE username = $1";
+	const values = [emailOrUsername];
 	try {
-		const result = await pool.query(
-			`SELECT email, username, uid, password FROM users WHERE ${loginMethod} = $1`,
-			[emailOrUsername]
-		);
+		const result = await pool.query(text, values);
 		const userIn = result.rows[0];
 		const user = {
 			email: userIn.email,
@@ -80,14 +77,14 @@ const login = async (req, res) => {
 				req.session.userID = userIn.uid;
 				return res.status(200).send({ user });
 			} else {
-				return res.send({
+				return res.status(400).send({
 					errors: [
 						{ field: "password", message: "password does not match, try again" },
 					],
 				});
 			}
 		} catch (err) {
-			return res.send({
+			return res.status(400).send({
 				errors: [
 					{
 						field: "unknown error",
@@ -97,7 +94,7 @@ const login = async (req, res) => {
 			});
 		}
 	} catch (err) {
-		return res.send({
+		return res.status(400).send({
 			errors: [
 				{ field: "emailOrUsername", message: "user cannot be found, try again" },
 			],

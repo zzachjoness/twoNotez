@@ -41,7 +41,7 @@ const createNote = async (req, res) => {
 const deleteNote = async (req, res) => {
 	const nid = req.body.nid;
 	const text = `DELETE FROM notes WHERE nid = $1 RETURNING *`;
-	vaules = [nid];
+	const values = [nid];
 	try {
 		const result = pool.query(text, values);
 		const notes = result.rows;
