@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config();
 const BodyParser = require("body-parser");
+const CookieParser = require("cookie-parser");
 const cors = require("cors");
 const session = require("express-session");
 const connectRedis = require("connect-redis");
@@ -11,6 +12,7 @@ const { response } = require("express");
 const users = require("./queries/users");
 const notes = require("./queries/notes");
 const { celebrate, Joi, errors, Segments } = require("celebrate");
+const { JSONCookie } = require("cookie-parser");
 
 const app = express();
 const port = process.env.PORT;
@@ -19,6 +21,7 @@ const RedisStore = connectRedis(session);
 const redis = new Redis();
 
 app.use(BodyParser.json());
+app.use(CookieParser());
 app.use(
 	express.urlencoded({
 		extended: true,
@@ -70,7 +73,17 @@ app.post(
 	}),
 	users.register
 );
-app.post("/login", users.login);
+//app.post("/login", users.login);
+app.post(
+	"/login",
+	celebrate({
+		[Segments.BODY]: Joi.object().keys({
+			emailOrUsername: Joi.string().required(),
+			password: Joi.string().required(),
+		}),
+	}),
+	users.login
+);
 app.get("/me", users.me);
 app.get("/logout", users.logout);
 // note http
