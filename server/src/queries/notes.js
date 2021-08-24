@@ -29,6 +29,7 @@ const getNotes = async (req, res) => {
 const createNote = async (req, res) => {
 	const text = `INSERT INTO notes(uid, last_updated) VALUES ($1, (to_timestamp(${Date.now()} / 1000.0))) RETURNING *`;
 	const values = [req.session.userID];
+	console.log(values);
 	try {
 		const result = await pool.query(text, values);
 		const note = result.rows;

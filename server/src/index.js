@@ -13,6 +13,7 @@ const users = require("./queries/users");
 const notes = require("./queries/notes");
 const { celebrate, Joi, errors, Segments } = require("celebrate");
 const { JSONCookie } = require("cookie-parser");
+const bodyParser = require("body-parser");
 
 const app = express();
 const port = process.env.PORT;
@@ -61,7 +62,6 @@ app.get("/", (_, res) => {
 });
 
 // user http
-//app.post("/register", users.register);
 app.post(
 	"/register",
 	celebrate({
@@ -73,7 +73,6 @@ app.post(
 	}),
 	users.register
 );
-//app.post("/login", users.login);
 app.post(
 	"/login",
 	celebrate({
@@ -89,7 +88,19 @@ app.get("/logout", users.logout);
 // note http
 app.post("/createNote", notes.createNote);
 app.post("/deleteNote", notes.deleteNote);
-app.post("/updateNote", notes.updateNote);
+//app.post("/updateNote", notes.updateNote);
+app.post(
+	"/updateNote",
+	celebrate({
+		[Segments.BODY]: Joi.object().keys({
+			category: Joi.string().required(),
+			title: Joi.string().required(),
+			body: Joi.string().required(),
+			nid: Joi.number().integer().required(),
+		}),
+	}),
+	notes.updateNote
+);
 app.get("/getNotes", notes.getNotes);
 
 app.listen(port, () => {
